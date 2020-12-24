@@ -15,10 +15,8 @@ SET(DMOTL_VERSION "${DMOTL_VERSION_MAJOR}.${DMOTL_VERSION_MINOR}.${DMOTL_VERSION
 MESSAGE(STATUS "VERSION: ${DMOTL_VERSION}")
 
 OPTION(USE_DMOTL "use dmotl" OFF)
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/include/dmotl_config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/dmotl_config.h)
 
-LibImport("dmotl_module" "src/dmotl_module")
-ExeImport("test" "dmotl_module")
+ExeImport("test" "")
 
 #ADD_CUSTOM_COMMAND(
 #TARGET dmotltest
