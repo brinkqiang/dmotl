@@ -21,6 +21,7 @@ if (WIN32)
 	ExeImport("test" "odbccp32;odbc32")
 else(WIN32)
 	add_definitions(/DOTL_ODBC_UNIX)
+	#sudo yum install unixODBC-devel
 	ExeImport("test" "odbccp32;odbc32")
 endif(WIN32)
 
