@@ -16,6 +16,8 @@ MESSAGE(STATUS "VERSION: ${DMOTL_VERSION}")
 
 OPTION(USE_DMOTL "use dmotl" OFF)
 
+add_definitions(/DOTL_DESTRUCTORS_DO_NOT_THROW)
+
 if (WIN32)
 	ExeImport("test" "odbccp32;odbc32")
 else(WIN32)
