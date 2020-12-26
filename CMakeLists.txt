@@ -22,11 +22,6 @@ if (WIN32)
 else(WIN32)
 	add_definitions(/DOTL_ODBC_UNIX)
 	#sudo yum install unixODBC-devel
-	FIND_PACKAGE(odbc)
-	if(ODBC_FOUND)
-		include(ODBC_INCLUDE_DIRS)
-	endif(ODBC_FOUND)
-	
 	ExeImport("test" "odbc")
 endif(WIN32)
 
