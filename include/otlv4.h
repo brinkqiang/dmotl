@@ -5615,7 +5615,6 @@ public:
    if(otl_uncaught_exception()) return;
    OTL_TMPL_EXCEPTION ex(connect_struct);
    connect_struct.cleanup();
-   throw ex;
   }
  }
 
@@ -8732,46 +8731,6 @@ public:
          s.set_len(len2);
          look_ahead();
 #endif
-       }
-     }
-   }
-   break;
-   case otl_var_varchar_long:
-   {
-       if(!eof_intern()){
-         if(sl[cur_col].get_var_struct().get_otl_adapter()==otl_ora8_adapter){
-#if defined(OTL_UNICODE) // [i_a] the only differences is the absence of the use of the length 'sl[cur_col].get_len(this->cur_row)' in here. Is this correct for ORA8 in Unicode mode only?
-  		   int len2=0;
-           OTL_CHAR* source=OTL_RCAST(OTL_CHAR*,sl[cur_col].val(this->cur_row));
-           OTL_ASSERT(s.get_char_width() == sizeof(OTL_CHAR)); // make sure the otl_long_string supports UNICODE!
-           OTL_CHAR* target=OTL_RCAST(OTL_CHAR*,s.v);
-           while(*source && len2<s.get_buf_size()){
-             *target++=*source++;
-             ++len2;
-           }
-           s.null_terminate_string(len2);
-           s.set_len(len2);
-           look_ahead();
-#else
-           unsigned char* c=OTL_RCAST(unsigned char*,sl[cur_col].val(this->cur_row));
-           int len2=sl[cur_col].get_len(this->cur_row);
-           if(len2>s.get_buf_size())
-             len2=s.get_buf_size();
-		   OTL_ASSERT(s.get_char_width() == sizeof(OTL_CHAR)); // make sure the otl_long_string supports the correct character width (Unicode or regular)!
-           otl_memcpy(s.v,c,len2,sl[cur_col].get_ftype());
-           s.null_terminate_string(len2);
-           s.set_len(len2);
-           look_ahead();
-#endif
-       }else{
-         unsigned char* c=OTL_RCAST(unsigned char*,sl[cur_col].val(this->cur_row));
-         int len2=sl[cur_col].get_len(this->cur_row);
-         if(len2>s.get_buf_size())
-           len2=s.get_buf_size();
-         otl_memcpy(s.v,c,len2,sl[cur_col].get_ftype());
-         s.null_terminate_string(len2);
-         s.set_len(len2);
-         look_ahead();
        }
      }
    }
