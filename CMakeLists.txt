@@ -27,7 +27,7 @@ else(WIN32)
 		include(ODBC_INCLUDE_DIRS)
 	endif(ODBC_FOUND)
 	
-	ExeImport("test" "${ODBC_LIBRARIES}")
+	ExeImport("test" "odbc32")
 endif(WIN32)
 
 #ADD_CUSTOM_COMMAND(
