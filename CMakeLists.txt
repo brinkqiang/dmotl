@@ -16,7 +16,6 @@ MESSAGE(STATUS "VERSION: ${DMOTL_VERSION}")
 
 OPTION(USE_DMOTL "use dmotl" OFF)
 
-add_definitions(/DOTL_ODBC_UNIX)
 if (WIN32)
 	ExeImport("test" "odbccp32;odbc32")
 else(WIN32)
