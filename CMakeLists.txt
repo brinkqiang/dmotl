@@ -21,7 +21,7 @@ if (WIN32)
 	ExeImport("test" "odbccp32;odbc32")
 else(WIN32)
 	add_definitions(/DOTL_ODBC_UNIX)
-	ExeImport("test" "odbccp32;odbc32")
+	ExeImport("test" "")
 endif(WIN32)
 
 #ADD_CUSTOM_COMMAND(
