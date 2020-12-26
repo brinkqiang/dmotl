@@ -16,7 +16,7 @@ MESSAGE(STATUS "VERSION: ${DMOTL_VERSION}")
 
 OPTION(USE_DMOTL "use dmotl" OFF)
 
-ExeImport("test" "")
+ExeImport("test" "odbccp32;odbc32")
 
 #ADD_CUSTOM_COMMAND(
 #TARGET dmotltest
