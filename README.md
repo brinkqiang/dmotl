@@ -10,22 +10,21 @@ Copyright (c) 2013-2018 brinkqiang (brink.qiang@gmail.com)
 [![GitHub forks](https://img.shields.io/github/forks/brinkqiang/dmotl.svg?label=Fork)](https://github.com/brinkqiang/dmotl)
 
 ## Build status
-| [Linux][lin-link] | [MacOSX][osx-link] | [Windows][win-link] |
+| [Linux][lin-link] | [Mac][mac-link] | [Windows][win-link] |
 | :---------------: | :----------------: | :-----------------: |
-| ![lin-badge]      | ![osx-badge]       | ![win-badge]        |
+| ![lin-badge]      | ![mac-badge]       | ![win-badge]        |
 
-[lin-badge]: https://travis-ci.org/brinkqiang/dmotl.svg?branch=master "Travis build status"
-[lin-link]:  https://travis-ci.org/brinkqiang/dmotl "Travis build status"
-[osx-badge]: https://travis-ci.org/brinkqiang/dmotl.svg?branch=master "Travis build status"
-[osx-link]:  https://travis-ci.org/brinkqiang/dmotl "Travis build status"
-[win-badge]: https://ci.appveyor.com/api/projects/status/github/brinkqiang/dmotl?branch=master&svg=true "AppVeyor build status"
-[win-link]:  https://ci.appveyor.com/project/brinkqiang/dmotl "AppVeyor build status"
+[lin-badge]: https://github.com/brinkqiang/dmotl/workflows/linux/badge.svg "linux build status"
+[lin-link]:  https://github.com/brinkqiang/dmotl/actions/workflows/linux.yml "linux build status"
+[mac-badge]: https://github.com/brinkqiang/dmotl/workflows/mac/badge.svg "mac build status"
+[mac-link]:  https://github.com/brinkqiang/dmotl/actions/workflows/mac.yml "mac build status"
+[win-badge]: https://github.com/brinkqiang/dmotl/workflows/win/badge.svg "win build status"
+[win-link]:  https://github.com/brinkqiang/dmotl/actions/workflows/win.yml "win build status"
 
 ## Intro
 dmotl
 ```cpp
 ```
 ## Contacts
-[![Join the chat](https://badges.gitter.im/brinkqiang/dmotl/Lobby.svg)](https://gitter.im/brinkqiang/dmotl)
 
 ## Thanks
