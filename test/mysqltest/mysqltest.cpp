@@ -33,7 +33,12 @@ public:
                  const std::string& server = "127.0.0.1",
                  int port = 3306) {
         std::ostringstream conn_str;
-        conn_str << "DSN=mysql;"
+
+        std::string driver = "DRIVER={MySQL ODBC 9.2 Unicode Driver};";
+
+        //std::string driver = "DSN=mysql;";
+
+        conn_str << driver
                  << "UID=" << user << ";"
                  << "PWD=" << password << ";"
                  << "SERVER=" << server << ";"
