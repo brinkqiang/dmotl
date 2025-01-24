@@ -1,4 +1,6 @@
 
+echo sudo apt install unixodbc-dev
+
 rmdir /S /Q build
 mkdir build
 pushd build
