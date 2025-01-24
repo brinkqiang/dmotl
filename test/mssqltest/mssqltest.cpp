@@ -1,4 +1,6 @@
 
+#ifdef WIN32
+
 #define OTL_ODBC_MSSQL_2008 // Compile OTL 4/ODBC, MS SQL 2008
 //#define OTL_ODBC // Compile OTL 4/ODBC. Uncomment this when used with MS SQL 7.0/ 2000
 #pragma warning(push)
@@ -105,3 +107,9 @@ int main()
  return 0;
 
 }
+#else
+int main()
+{
+    return 0;
+}
+#endif
