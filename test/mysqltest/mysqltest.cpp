@@ -1,141 +1,174 @@
-#include <iostream>
-using namespace std;
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 #define OTL_ODBC_MYSQL // Compile OTL 4/ODBC/MySQL
-// #define OTL_ODBC_UNIX // uncomment this line if UnixODBC is used
-#include <otlv4.h> // include the OTL 4 header file
+#include <iostream>
+#include <otlv4.h>
+#include <string>
+#include <sstream>
+#include <stdexcept>
 
-otl_connect db; // connect object
+class DatabaseHandler {
+private:
+    otl_connect db;
+    static constexpr const char* DEFAULT_DB = "test_db";
+    static constexpr const char* TABLE_NAME = "test_tab";
 
-void insert()
-// insert rows into table
-{ 
- otl_stream o(1, // buffer size should be == 1 always on INSERT
-              "insert into test_tab values(:f1<int>,:f2<char[31]>)", 
-                 // SQL statement
-              db // connect object
-             );
- char tmp[32];
+    void executeDirect(const std::string& sql) {
+        otl_cursor::direct_exec(db, sql.c_str(), otl_exception::enabled);
+    }
 
- for(int i=1;i<=100;++i){
-#if defined(_MSC_VER)
-#if (_MSC_VER >= 1400) // VC++ 8.0 or higher
-  sprintf_s(tmp,sizeof(tmp),"Name%d",i);
-#else
-  sprintf(tmp,"Name%d",i);
-#endif
-#else
-  sprintf(tmp,"Name%d",i);
-#endif
-  o<<i<<tmp;
- }
-}
+public:
+    DatabaseHandler() { otl_connect::otl_initialize(); }
+    
+    ~DatabaseHandler() {
+        try {
+            if (db.connected) db.logoff();
+        } catch (...) {} // Destructors should not throw
+    }
 
-void update(const int af1)
-// insert rows into table
-{ 
- otl_stream o(1, // buffer size should be == 1 always on UPDATE
-              "UPDATE test_tab "
-              "   SET f2=:f2<char[31]> "
-              " WHERE f1=:f1<int>", 
-                 // UPDATE statement
-              db // connect object
-             );
+    void connect(const std::string& user, 
+                 const std::string& password,
+                 const std::string& server = "127.0.0.1",
+                 int port = 3306) {
+        std::ostringstream conn_str;
+        conn_str << "DSN=mysql;"
+                 << "UID=" << user << ";"
+                 << "PWD=" << password << ";"
+                 << "SERVER=" << server << ";"
+                 << "PORT=" << port << ";"
+                 << "CHARSET=utf8;";
+        
+        try {
+            db.rlogon(conn_str.str().c_str());
+        } catch (const otl_exception& e) {
+            handleException(e);
+            throw std::runtime_error("Connection failed");
+        }
+    }
 
- o<<"Name changed"<<af1;
- o<<otl_null()<<af1+1; // set f2 to NULL
+    void initializeDatabase() {
+        try {
+            executeDirect("CREATE DATABASE IF NOT EXISTS " + std::string(DEFAULT_DB));
+            executeDirect("USE " + std::string(DEFAULT_DB));
+            executeDirect(
+                "CREATE TABLE IF NOT EXISTS " + std::string(TABLE_NAME) + 
+                "(id INT PRIMARY KEY, name VARCHAR(255), "
+                "modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+            );
+        } catch (const otl_exception& e) {
+            handleException(e);
+            throw std::runtime_error("Database initialization failed");
+        }
+    }
+    void dropDatabase() {
+        try {
+            executeDirect("DROP DATABASE IF EXISTS " + std::string(DEFAULT_DB));
+        } catch (const otl_exception& e) {
+            handleException(e);
+            throw std::runtime_error("Database initialization failed");
+        }
+    }
+    void insertData(int num_records) {
+        try {
+            otl_stream insert_stream(
+                1, // Buffer size 1 = no buffering
+                ("INSERT INTO " + std::string(TABLE_NAME) + 
+                " (id, name) VALUES(:id<int>, :name<char[255]>)").c_str(),
+                db
+            );
 
-}
+            for (int i = 1; i <= num_records; ++i) {
+                std::string name = "Record_" + std::to_string(i);
+                insert_stream << i << name.c_str();
+            }
+        } catch (const otl_exception& e) {
+            handleException(e);
+            throw std::runtime_error("Data insertion failed");
+        }
+    }
 
-void select(const int af1)
-{ 
- // MyODBC does not allow any ih/nput bind variables in the WHERE clause
- // in a SELECT statement.
- // Therefore, the SELECT statement has to be generated literally.
- char stmbuf[1024];
-#if defined(_MSC_VER)
-#if (_MSC_VER >= 1400) // VC++ 8.0 or higher
- sprintf_s(stmbuf,sizeof(stmbuf),
-         "select * from test_tab where f1>=%d and f1<=%d*2",
-         af1,
-         af1
-        );
-#else
- sprintf(stmbuf,
-         "select * from test_tab where f1>=%d and f1<=%d*2",
-         af1,
-         af1
-        );
-#endif
-#else
- sprintf(stmbuf,
-         "select * from test_tab where f1>=%d and f1<=%d*2",
-         af1,
-         af1
-        );
-#endif
- otl_stream i(50, // buffer size may be > 1
-              stmbuf, // SELECT statement
-              db // connect object
-             ); 
-   // create select stream
- 
- int f1;
- char f2[31];
+    void updateRecord(int id, const std::string& new_name) {
+        try {
+            otl_stream update_stream(
+                1,
+                ("UPDATE " + std::string(TABLE_NAME) + 
+                " SET name = :name<char[255]> WHERE id = :id<int>").c_str(),
+                db
+            );
+            
+            if (new_name.empty()) {
+                update_stream << otl_null() << id;
+            } else {
+                update_stream << new_name.c_str() << id;
+            }
+        } catch (const otl_exception& e) {
+            handleException(e);
+            throw std::runtime_error("Update operation failed");
+        }
+    }
 
- while(!i.eof()){ // while not end-of-data
-  i>>f1;
-  cout<<"f1="<<f1<<", f2=";
-  i>>f2;
-  if(i.is_null())
-   cout<<"NULL";
-  else
-   cout<<f2;
-  cout<<endl;
- }
+    void displayRecords(int threshold) {
+        try {
+            std::ostringstream query;
+            query << "SELECT id, name, modified_at FROM " << TABLE_NAME 
+                  << " WHERE id >= " << threshold 
+                  << " ORDER BY modified_at DESC";
 
-}
+            otl_stream select_stream(1, query.str().c_str(), db);
+            
+            int id;
+            char name[255];
+            otl_datetime timestamp;
 
-int main()
-{
- otl_connect::otl_initialize(); // initialize ODBC environment
- try{
+            while (!select_stream.eof()) {
+                select_stream >> id >> name >> timestamp;
+                std::cout << "ID: " << id
+                          << "\tName: " << (select_stream.is_null() ? "NULL" : name)
+                          << "\tLast Modified: " << formatTimestamp(timestamp)
+                          << std::endl;
+            }
+        } catch (const otl_exception& e) {
+            handleException(e);
+            throw std::runtime_error("Query failed");
+        }
+    }
 
-  db.rlogon("UID=scott;PWD=tiger;DSN=mysql"); // connect to ODBC
-//  db.rlogon("scott/tiger@mysql"); // connect to ODBC, alternative format
-                                    // of connect string 
+private:
+    static void handleException(const otl_exception& e) {
+        std::cerr << "Database Error:\n"
+                  << "Message: " << e.msg << "\n"
+                  << "SQL State: " << e.sqlstate << "\n"
+                  << "Statement: " << e.stm_text << "\n"
+                  << "Variable: " << e.var_info << "\n"
+                  << "Code: " << e.code << "\n";
+    }
+    static std::string formatTimestamp(const otl_datetime& dt) {
+        std::ostringstream oss;
+        oss << std::setfill('0')
+            << std::setw(4) << dt.year << "-"
+            << std::setw(2) << dt.month << "-"
+            << std::setw(2) << dt.day << " "
+            << std::setw(2) << dt.hour << ":"
+            << std::setw(2) << dt.minute << ":"
+            << std::setw(2) << dt.second;
+        return oss.str();
+    }
 
-  otl_cursor::direct_exec
-   (
-    db,
-    "drop table test_tab",
-    otl_exception::disabled // disable OTL exceptions
-   ); // drop table
+};
 
-  otl_cursor::direct_exec
-   (
-    db,
-    "create table test_tab(f1 int, f2 varchar(30))"
-    );  // create table
-
-  insert(); // insert records into the table
-  update(10); // update records in the table
-  select(8); // select records from the table
-
- }
-
- catch(otl_exception& p){ // intercept OTL exceptions
-  cerr<<p.msg<<endl; // print out error message
-  cerr<<p.stm_text<<endl; // print out SQL that caused the error
-  cerr<<p.sqlstate<<endl; // print out SQLSTATE message
-  cerr<<p.var_info<<endl; // print out the variable that caused the error
- }
-
- db.logoff(); // disconnect from ODBC
-
- return 0;
-
+int main() {
+    try {
+        DatabaseHandler db;
+        db.connect("root", "sdo.com", "localhost", 3306);
+        db.dropDatabase();
+        db.initializeDatabase();
+        
+        db.insertData(10);
+        db.updateRecord(5, "Updated_Record");
+        db.updateRecord(6, "");  // Set to NULL
+        db.displayRecords(4);
+        
+    } catch (const std::exception& e) {
+        std::cerr << "Application Error: " << e.what() << std::endl;
+        return 1;
+    }
+    return 0;
 }
