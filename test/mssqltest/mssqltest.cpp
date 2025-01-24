@@ -1,10 +1,13 @@
-#include <iostream>
-using namespace std;
-#include <stdio.h>
 
 #define OTL_ODBC_MSSQL_2008 // Compile OTL 4/ODBC, MS SQL 2008
 //#define OTL_ODBC // Compile OTL 4/ODBC. Uncomment this when used with MS SQL 7.0/ 2000
-#include <otlv4.h> // include the OTL 4 header file
+#pragma warning(push)
+#pragma warning(disable: 5272)
+#include <otlv4.h>
+#pragma warning(pop)
+
+#include <iostream>
+#include <stdio.h>
 
 otl_connect db; // connect object
 
@@ -51,7 +54,7 @@ void select(void)
 
  while(!i.eof()){ // while not end-of-data
   i>>f1>>f2;
-  cout<<"f1="<<f1<<", f2="<<f2[0]<<f2[f2.len()-1]<<", len="<<f2.len()<<endl;
+  std::cout<<"f1="<<f1<<", f2="<<f2[0]<<f2[f2.len()-1]<<", len="<<f2.len()<<std::endl;
  }
  
  i<<4<<4; // assigning :1 = 4, :2 = 4
@@ -60,7 +63,7 @@ void select(void)
 
  while(!i.eof()){ // while not end-of-data
   i>>f1>>f2;
-  cout<<"f1="<<f1<<", f2="<<f2[0]<<f2[f2.len()-1]<<", len="<<f2.len()<<endl;
+  std::cout<<"f1="<<f1<<", f2="<<f2[0]<<f2[f2.len()-1]<<", len="<<f2.len()<<std::endl;
  }
 
 }
@@ -91,10 +94,10 @@ int main()
  }
 
  catch(otl_exception& p){ // intercept OTL exceptions
-  cerr<<p.msg<<endl; // print out error message
-  cerr<<p.stm_text<<endl; // print out SQL that caused the error
-  cerr<<p.sqlstate<<endl; // print out SQLSTATE message
-  cerr<<p.var_info<<endl; // print out the variable that caused the error
+  std::cerr<<p.msg<<std::endl; // print out error message
+  std::cerr<<p.stm_text<<std::endl; // print out SQL that caused the error
+  std::cerr<<p.sqlstate<<std::endl; // print out SQLSTATE message
+  std::cerr<<p.var_info<<std::endl; // print out the variable that caused the error
  }
 
  db.logoff(); // disconnect from ODBC
