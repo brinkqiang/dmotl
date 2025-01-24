@@ -1,9 +1,13 @@
 #define OTL_ODBC_MYSQL // Compile OTL 4/ODBC/MySQL
 #include <iostream>
-#include <otlv4.h>
 #include <string>
 #include <sstream>
 #include <stdexcept>
+
+#pragma warning(push)
+#pragma warning(disable: 5272)
+#include <otlv4.h>
+#pragma warning(pop)
 
 class DatabaseHandler {
 private:
@@ -34,7 +38,7 @@ public:
                  << "PWD=" << password << ";"
                  << "SERVER=" << server << ";"
                  << "PORT=" << port << ";"
-                 << "CHARSET=utf8;";
+                 << "CHARSET=utf8mb4;";
         
         try {
             db.rlogon(conn_str.str().c_str());
